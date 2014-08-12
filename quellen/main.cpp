@@ -121,7 +121,7 @@ void AmericanOption::simplified() {
 
 	Daten();
 
-	double eps = 0.005;
+	double eps = 0.01;
 	int maxL = 10;
 	n = new int[maxL];
 
@@ -150,7 +150,7 @@ void AmericanOption::simplified() {
 		weights_erstellen(L - 1);
 		trainingpaths_regression(L - 1);
 
-		for (int ii = 0; ii < 1000; ++ii) {
+		for (int ii = 0; ii < 10000; ++ii) {
 			addLevelPath(L - 1);
 			if (ii % 100 == 0)
 				printInfo();
