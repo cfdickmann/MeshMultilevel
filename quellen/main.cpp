@@ -92,12 +92,14 @@ void AmericanOption::addLevelPath(int l) {
 
 double AmericanOption::Pfad(double ** XX, int l) {
 	double erg = 0;
+int stopp=N-1;
 
 	for (int n = 0; n < N; ++n) {
 		if (payoff(XX[n], n) > 0 || n == N - 1)
 			if (payoff(XX[n], n) >= C_estimate_Mesh(XX[n], n, l)) {
 				erg += payoff(XX[n], n);
 //				printf("%f\n", C_estimate_Mesh(XX[n], n, l));
+				stopp=n;
 				break;
 			}
 	}
@@ -112,6 +114,9 @@ double AmericanOption::Pfad(double ** XX, int l) {
 		}
 
 //	cv[l].push_back(EB.european_MaxCall_ND(XX[N-1],D,0,T,Strike,r,delta,sigma[0],0.01));
+	if(l==0)
+		erg-=EB.european_MaxCall_ND(XX[stopp],D,(double)(stopp)*dt,T,Strike,r,delta,sigma[0],0.01)
+		-0.665509;
 	return erg;
 
 }
@@ -121,7 +126,7 @@ void AmericanOption::simplified() {
 
 	Daten();
 
-	double eps = 0.01;
+	double eps = 0.005;
 	int maxL = 10;
 	n = new int[maxL];
 
@@ -166,7 +171,7 @@ void AmericanOption::simplified() {
 			double hinter = sqrt(
 					pow((double) Mtraining(ll), -kappa2)
 							* varianz(Levelergs[ll]));
-			n[ll] = ceil(2. / eps / eps * vorder * hinter);
+			n[ll] = ceil(3. / eps / eps * vorder * hinter);
 			//	printf("vorder= %.30lf, hinter=%.30lf\n", vorder, hinter);
 			printf("\n\nn[%d]=%d\n", L - 1, n[L - 1]);
 		}
@@ -184,7 +189,7 @@ void AmericanOption::simplified() {
 				Pl += mittelwert(Levelergs[ll]);
 			}
 
-			if (mittelwert(Levelergs[L - 1]) / Pl > eps / sqrt(2.)) {
+			if (mittelwert(Levelergs[L - 1]) / Pl > eps / sqrt(3.)) {
 				L += 1;
 				done = false;
 			}

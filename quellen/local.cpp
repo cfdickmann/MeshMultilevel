@@ -91,7 +91,7 @@ double AmericanOption::C_estimate_Mesh(double* x, int Etime, int l) {
 //	if(l==1) return 15;
 //  return (double)(rand()%1000)/100.;
 
-	double int_dt = 0.001*10;
+	double int_dt = 0.001*10.;
 
 	double v = EB.european_MaxCall_ND(x, D, (double) (Etime) * (dt), //gutes
 	(double) (Etime + 1) * dt, Strike, r, delta, sigma[0], int_dt);
