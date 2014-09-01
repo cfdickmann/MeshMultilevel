@@ -19,7 +19,6 @@ void AmericanOption::trainingpaths_erstellen(int l) {
 	//generator.setSeed(7);
 	double** wdiff = DoubleFeld(N, D);
 	for (int m = 0; m < Mtraining(l); ++m) {
-
 		for (int d = 0; d < D; ++d)
 			for (int n = 0; n < N; ++n)
 				if (m % 2 == 0)
@@ -50,10 +49,13 @@ void AmericanOption::ErgebnisseAusgeben(int l) {
 void AmericanOption::printInfo() {
 	double sum = 0;
 	for (int l = 0; l < L; ++l) {
-		printf("Level %d:\t %.3lf (%.3lf) \t%d n=%d Pfade,\n", l,
+		printf("Level %d:\t %.5lf (%.5lf) \t %d Pfade", l,
 				mittelwert(Levelergs[l]), varianz(Levelergs[l]),
 //				RegressionV(Levelergs[l],cv[l],EB.european_MaxCall_ND(X0,D,0,T,Strike,r,delta,sigma[0],0.001)),
-				(int) Levelergs[l].size(), n[l]);
+				(int) Levelergs[l].size());
+		if (n != NULL)
+			printf(" n=%d ", n[l]);
+		printf("\n");
 		sum += mittelwert(Levelergs[l]);
 	}
 	printf("sum=%f\n", sum);
@@ -80,9 +82,7 @@ void AmericanOption::addLevelPath(int l) {
 //	Pfadgenerieren(XX, wdiff, 0, X0);
 //	double e2 = Pfad(XX, l);
 
-
-
-	Levelergs[l].push_back(e1 );
+	Levelergs[l].push_back(e1);
 
 //	Levelergs[l].push_back(0.5 * (e1 + e2));
 
@@ -92,14 +92,23 @@ void AmericanOption::addLevelPath(int l) {
 
 double AmericanOption::Pfad(double ** XX, int l) {
 	double erg = 0;
-int stopp=N-1;
+//int stopp=N-1;
 
 	for (int n = 0; n < N; ++n) {
 		if (payoff(XX[n], n) > 0 || n == N - 1)
 			if (payoff(XX[n], n) >= C_estimate_Mesh(XX[n], n, l)) {
 				erg += payoff(XX[n], n);
-//				printf("%f\n", C_estimate_Mesh(XX[n], n, l));
-				stopp=n;
+				erg -=
+						1.2
+								* (EB.european_MaxCall_ND(XX[n], D,
+										(double) (n) * dt, T, Strike, r, delta,
+										sigma[0], 0.005) - 6.65509);
+//				erg -= 1.2
+//						* (EB.european_MaxCall_ND(XX[n], D, (double) (n) * dt,
+//								T, Strike, r, delta, sigma[0], 0.01)
+//								- EB.european_MaxCall_ND(X0, D, 0, T, Strike, r,
+//										delta, sigma[0], 0.01));
+
 				break;
 			}
 	}
@@ -109,14 +118,21 @@ int stopp=N-1;
 			if (payoff(XX[n], n) > 0 || n == N - 1)
 				if (payoff(XX[n], n) >= C_estimate_Mesh(XX[n], n, l - 1)) {
 					erg -= payoff(XX[n], n);
+					erg += 1.2
+							* (EB.european_MaxCall_ND(XX[n], D,
+									(double) (n) * dt, T, Strike, r, delta,
+									sigma[0], 0.005) - 6.65509);
+//					erg -= 1.2
+//							* (EB.european_MaxCall_ND(XX[n], D,
+//									(double) (n) * dt, T, Strike, r, delta,
+//									sigma[0], 0.01)
+//									- EB.european_MaxCall_ND(X0, D, 0, T,
+//											Strike, r, delta, sigma[0], 0.01));
+
 					break;
 				}
 		}
 
-//	cv[l].push_back(EB.european_MaxCall_ND(XX[N-1],D,0,T,Strike,r,delta,sigma[0],0.01));
-	if(l==0)
-		erg-=EB.european_MaxCall_ND(XX[stopp],D,(double)(stopp)*dt,T,Strike,r,delta,sigma[0],0.01)
-		-0.665509;
 	return erg;
 
 }
@@ -126,8 +142,8 @@ void AmericanOption::simplified() {
 
 	Daten();
 
-	double eps = 0.005;
-	int maxL = 10;
+	double eps = 0.025;
+	int maxL = 15;
 	n = new int[maxL];
 
 	dt = T / (double) (N - 1);
@@ -137,7 +153,6 @@ void AmericanOption::simplified() {
 	weight_sum = DoubleFeld(maxL, N, Mtraining(maxL - 1));
 
 	Levelergs = new vector<double> [maxL];
-	//	cv = new vector<double> [L];
 
 	L = 1;
 
@@ -145,19 +160,19 @@ void AmericanOption::simplified() {
 
 	while (!done) {
 
-		if (L > 1) {
-			trainingpaths_erstellen(L - 2);
-			weights_erstellen(L - 2);
-			trainingpaths_regression(L - 2);
-		}
+//		if (L > 1) {
+//			trainingpaths_erstellen(L - 2);
+//			weights_erstellen(L - 2);
+//			trainingpaths_regression(L - 2);
+//		}
 
 		trainingpaths_erstellen(L - 1);
 		weights_erstellen(L - 1);
 		trainingpaths_regression(L - 1);
 
-		for (int ii = 0; ii < 10000; ++ii) {
+		for (int ii = 0; ii < 100; ++ii) {
 			addLevelPath(L - 1);
-			if (ii % 100 == 0)
+			if (ii % 1000 == 0)
 				printInfo();
 		}
 
@@ -183,13 +198,16 @@ void AmericanOption::simplified() {
 			for (int ll = 0; ll < L; ++ll) {
 				for (int i = Levelergs[ll].size(); i < n[ll]; ++i) {
 					addLevelPath(ll);
-					if (i % 100 == 0)
+					if (i % 1000 == 0 || i == n[ll] - 1)
 						printInfo();
 				}
 				Pl += mittelwert(Levelergs[ll]);
 			}
 
-			if (mittelwert(Levelergs[L - 1]) / Pl > eps / sqrt(3.)) {
+//			if (mittelwert(Levelergs[L - 1]) / Pl > eps / sqrt(3.)) { //old criterion
+			if (max(fabs(mittelwert(Levelergs[L - 1])),
+					0.5 * fabs(mittelwert(Levelergs[L - 2])))
+					> eps / sqrt(3.)) { //new criterion
 				L += 1;
 				done = false;
 			}
@@ -199,28 +217,19 @@ void AmericanOption::simplified() {
 			L += 1;
 			done = false;
 		}
-
-//		for (int l = 0; l < L; ++l)
-//			ErgebnisseAusgeben(L-1);
 	}
-
-//	char buffer[50];
 
 	double summe = 0;
 	for (int l = 0; l < L; ++l)
 		summe += mittelwert(Levelergs[l]);
-//		sprintf(buffer, "simpergs.txt", );
+
 	ofstream File("simpergs.txt", ios::out | ios::app);
 	if (File.is_open())
 		File << summe << endl;
 
-
-
-	ofstream FileLN("numberOfLevels.txt", ios::out| ios::app);
-	if(FileLN.is_open())
-	FileLN << L << endl;
-
-
+	ofstream FileLN("numberOfLevels.txt", ios::out | ios::app);
+	if (FileLN.is_open())
+		FileLN << L << endl;
 }
 
 void AmericanOption::run() {
@@ -233,8 +242,8 @@ void AmericanOption::run() {
 	weights = DoubleFeld(L, N, Mtraining(L - 1));
 	weight_sum = DoubleFeld(L, N, Mtraining(L - 1));
 
+	n = NULL;
 	Levelergs = new vector<double> [L];
-//	cv = new vector<double> [L];
 
 	for (int l = 0; l < L; ++l) {
 		printf("Level %d: %d training paths \n", l, Mtraining(l));
@@ -243,8 +252,8 @@ void AmericanOption::run() {
 		trainingpaths_regression(l); // Mesh
 	}
 
-	for (int kk = 0; kk < 500; ++kk) {
-		for (int i = 0; i < 10; ++i)
+	for (int kk = 0; kk < 10; ++kk) {
+		for (int i = 0; i < 1000; ++i)
 			for (int l = 0; l < L; ++l)
 				addLevelPath(l);
 		printInfo();
@@ -261,7 +270,6 @@ int main(int argc, char* args[]) {
 		string arg = args[1];
 		if (!arg.compare("-simp"))
 			AMO.simplified();
-
 	} else
 		AMO.run();
 }

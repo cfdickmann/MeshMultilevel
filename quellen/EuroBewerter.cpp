@@ -198,6 +198,7 @@ double EuroBewerter::exchange_option_diff(double x, double y, double t,
 
 double EuroBewerter::european_MaxCall_ND(double* x, int D, double t, double T,
 		double Strike, double r, double delta, double sigma, double dt) {
+	if(D==1)return call(t,T,x[0],Strike,r,delta,sigma);
 	if(dt==0)return 0;
 	double d_minus[D];
 	double d_plus[D];

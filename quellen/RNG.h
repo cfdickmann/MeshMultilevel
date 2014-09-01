@@ -28,8 +28,8 @@ public:
     double nextGaussian();
 
     void generate_numbers();
-private:
-   long int x,a,c,m;
+//private:
+//   long int x,a,c,m;
 
 //    int* MT;
 // int index;

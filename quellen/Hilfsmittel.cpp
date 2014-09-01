@@ -222,13 +222,13 @@ void InPipeSchreiben(int* pipe, double wert) {
 //	sprintf(string, "%f", wert);
 //	write(pipe[1], string, (strlen(string) + 1));
 }
-
-double AusPipeLesen(int* pipe) {
-//	close(pipe[1]);
-//	char readbuffer[200];
-//	read(pipe[0], readbuffer, sizeof(readbuffer));
-//	return atof(readbuffer);
-}
+//
+//double AusPipeLesen(int* pipe) {
+////	close(pipe[1]);
+////	char readbuffer[200];
+////	read(pipe[0], readbuffer, sizeof(readbuffer));
+////	return atof(readbuffer);
+//}
 
 double Max(double* v, int l) {
 	return v[argMax(v, l)];
@@ -652,7 +652,7 @@ double* LGS_mit_alglib_loesen(double** A, double* b, int Mphi) {
 //        }
 //        int r = (int) (1 + floor(log(max(1, n0 - 1)) / log(b)));
 //        double qnext = pow(b, r);
-//        int* a = bary(n0 - 1, b); //TODO
+//        int* a = bary(n0 - 1, b);
 //        int jmax = (int) floor(log(n0-1) / log(b));
 //
 //        double *** C = (double***)malloc(sizeof(double**)*d);
@@ -666,7 +666,7 @@ double* LGS_mit_alglib_loesen(double** A, double* b, int Mphi) {
 //            bpwrs[i] = 1. / pow(b, i + 1);
 //        }
 //        for (int k = n0; k <= nmax; ++k) {
-//            a = nextbary(jmax+1,a, b); //TODO
+//            a = nextbary(jmax+1,a, b);
 //            if (k == qnext) {
 //                r++;
 //                qnext = b * qnext;
