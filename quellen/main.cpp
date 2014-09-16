@@ -19,14 +19,18 @@ void AmericanOption::trainingpaths_erstellen(int l) {
 	//generator.setSeed(7);
 	double** wdiff = DoubleFeld(N, D);
 	for (int m = 0; m < Mtraining(l); ++m) {
-		for (int d = 0; d < D; ++d)
-			for (int n = 0; n < N; ++n)
-				if (m % 2 == 0)
-					wdiff[n][d] = generator.nextGaussian() * sqrt(dt);
-				else
-					wdiff[n][d] *= -1.;
-
-		Pfadgenerieren(X[l][m], wdiff, 0, X0);
+		if (l == 0 || m >= Mtraining(l-1)) {
+			for (int d = 0; d < D; ++d)
+				for (int n = 0; n < N; ++n)
+					if (m % 2 == 0)
+						wdiff[n][d] = generator.nextGaussian() * sqrt(dt);
+					else
+						wdiff[n][d] *= -1.;
+			Pfadgenerieren(X[l][m], wdiff, 0, X0);
+		} else
+			for (int d = 0; d < D; ++d)
+				for (int n = 0; n < N; ++n)
+					X[l][m][n][d] = X[l - 1][m][n][d];
 	}
 	deleteDoubleFeld(wdiff, N, D);
 }
@@ -142,7 +146,7 @@ void AmericanOption::simplified() {
 
 	Daten();
 
-	double eps = 0.025;
+	double eps = 0.05;
 	int maxL = 15;
 	n = new int[maxL];
 
@@ -158,13 +162,9 @@ void AmericanOption::simplified() {
 
 	bool done = false;
 
-	while (!done) {
+	double kappa2 = 1.;
 
-//		if (L > 1) {
-//			trainingpaths_erstellen(L - 2);
-//			weights_erstellen(L - 2);
-//			trainingpaths_regression(L - 2);
-//		}
+	while (!done) {
 
 		trainingpaths_erstellen(L - 1);
 		weights_erstellen(L - 1);
@@ -176,7 +176,6 @@ void AmericanOption::simplified() {
 				printInfo();
 		}
 
-		double kappa2 = 1.;
 		double vorder = 0;
 		for (int l = 0; l < L; ++l)
 			vorder += sqrt(
@@ -205,9 +204,8 @@ void AmericanOption::simplified() {
 			}
 
 //			if (mittelwert(Levelergs[L - 1]) / Pl > eps / sqrt(3.)) { //old criterion
-			if (max(fabs(mittelwert(Levelergs[L - 1])),
-					0.5 * fabs(mittelwert(Levelergs[L - 2])))
-					> eps / sqrt(3.)) { //new criterion
+			if (max((mittelwert(Levelergs[L - 1])),
+					0.5 * (mittelwert(Levelergs[L - 2]))) > eps / sqrt(3.)) { //new criterion
 				L += 1;
 				done = false;
 			}
@@ -230,6 +228,33 @@ void AmericanOption::simplified() {
 	ofstream FileLN("numberOfLevels.txt", ios::out | ios::app);
 	if (FileLN.is_open())
 		FileLN << L << endl;
+
+	long double comp_training1 = 0;
+	long double comp_training2 = 0;
+	long double comp_testing = 0;
+
+	for (int l = 0; l < L; ++l) {
+		comp_training1 += pow(Mtraining(l), kappa2 + 1);
+		if (l > 0)
+			comp_training1 += pow(Mtraining(l - 1), kappa2 + 1);
+		comp_training2 += pow(Mtraining(l), kappa2 + 1);
+		comp_testing += n[l] * pow(Mtraining(l), kappa2);
+		if (l > 0)
+			comp_testing += n[l] * pow(Mtraining(l - 1), kappa2);
+	}
+
+//	ofstream FileC1("comp_training.txt", ios::out | ios::app);
+//	if (FileC1.is_open())
+//		FileC1 << comp_training1 << endl;
+
+	ofstream FileC2("comp_training_trick.txt", ios::out | ios::app);
+	if (FileC2.is_open())
+		FileC2 << comp_training2/1000000. << endl;
+
+	ofstream FileC3("comp_testing.txt", ios::out | ios::app);
+	if (FileC3.is_open())
+		FileC3 << comp_testing/1000000. << endl;
+
 }
 
 void AmericanOption::run() {
@@ -253,7 +278,7 @@ void AmericanOption::run() {
 	}
 
 	for (int kk = 0; kk < 10; ++kk) {
-		for (int i = 0; i < 1000; ++i)
+		for (int i = 0; i < 100; ++i)
 			for (int l = 0; l < L; ++l)
 				addLevelPath(l);
 		printInfo();
@@ -265,6 +290,15 @@ void AmericanOption::run() {
 
 int main(int argc, char* args[]) {
 	AmericanOption AMO;
+//long double t=435343453454345345;
+//cout.precision(100);
+//
+//ofstream FileC2("trick.txt", ios::out | ios::app);
+//	if (FileC2.is_open())
+//		FileC2 <<  << endl;
+//
+//
+//	exit(0);
 
 	if (argc > 1) {
 		string arg = args[1];
