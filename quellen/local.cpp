@@ -6,7 +6,7 @@
 using namespace std;
 
 int AmericanOption::Mtraining(int l) {
-	return 20 * pow(2, l);
+	return 25 * pow(2, l);
 }
 
 void AmericanOption::trainingpaths_regression(int l) {
@@ -58,7 +58,7 @@ double AmericanOption::C_estimate_Mesh(double* x, int Etime, int l) {
 	if (Etime == N - 1)
 		return 0;
 
-	double int_dt = 0.005;
+	double int_dt = 0.002;
 
 	double v = EB.european_MaxCall_ND(x, D, (double) (Etime) * (dt), //gutes
 	(double) (Etime + 1) * dt, Strike, r, delta, sigma[0], int_dt);

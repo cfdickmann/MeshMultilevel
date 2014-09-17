@@ -26,6 +26,7 @@ public:
 	AmericanOption();
 	virtual ~AmericanOption();
 	vector<double>* Levelergs;
+	vector<double>* LevelergsFiner;
 
 	int option; // MAX_CALL or MIN_PUT
 	double delta; //dividend yield
