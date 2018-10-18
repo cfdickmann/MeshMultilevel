@@ -56,22 +56,6 @@ double EuroBewerter::put_diff2(double t, double T, double X0, double Strike,
 	return exp(-(r - delta) * t) * exp(-T * delta) * (-cnd(-d1));
 }
 
-//
-//// mein call
-//double EuroBewerter::call(double t, double T, double X0, double Strike,
-//		double r, double delta, double sigma) {
-//	double rStrich = r - delta;
-//	double TStrich = T - t;
-//	double d1 = (log(X0 / Strike) + (rStrich + sigma * sigma / 2.) * TStrich)
-//			/ (sigma * sqrt(TStrich));
-//	double d2 = d1 - sigma * sqrt(TStrich);
-//	double wert=exp(-delta * TStrich) * exp(-r * t)
-//			* (X0 * cnd(d1) - Strike * exp(-r * TStrich) * cnd(d2));
-//return wert*exp(-t*(r+delta));
-//}
-
-// Dieser hier ist getestet und gut, discounted und incl. dividend yield
-
 double EuroBewerter::call(double t, double T, double X0, double Strike,
 		double r, double delta, double sigma) {
 	double rStrich = r - delta;
@@ -83,46 +67,6 @@ double EuroBewerter::call(double t, double T, double X0, double Strike,
 	wert *= exp(-(delta) * T);
 	return wert * exp(-t * (r - delta));
 }
-
-////Call vom Nikolaus
-//double EuroBewerter::call(double t, double T, double X0, double Strike,
-//		double r, double delta, double sigma) {
-//
-//	T = T - t;
-//	double d1 = (log(X0 / Strike) + (r + sigma * sigma / 2) * T)
-//			/ (sigma * sqrt(T));
-//	double d2 = d1 - sigma * sqrt(T);
-//	return exp(r * t)
-//			* (X0 * cnd(d1) - Strike  * cnd(d2));
-//}
-////
-//double EuroBewerter::call_diff(double t, double T, double X0, double Strike,
-//		double r, double delta, double sigma) {
-//
-//	T = T - t;
-//	double d1 = (log(X0 / Strike) + (r + sigma * sigma / 2) * T)
-//			/ (sigma * sqrt(T));
-//
-//	return exp(r * t)
-//			* ( cnd(d1));
-//}
-
-//double EuroBewerter::call_diff(double t, double T, double X0, double Strike,
-//		double r, double delta, double sigma) {
-//return
-//}
-
-//auch getestet und gut
-
-//double EuroBewerter::put(double t, double T, double X0, double Strike, double r,
-//		double delta, double sigma) {
-//	r = r - delta;
-//	T = T - t;
-//	double d1 = (log(X0 / Strike) + (r + sigma * sigma / 2) * T)
-//			/ (sigma * sqrt(T));
-//	double d2 = d1 - sigma * sqrt(T);
-//	return exp(-(r+delta)*t)*(exp(-delta * T) * (Strike * exp(-r * T) * cnd(-d2) - X0 * cnd(-d1)));
-//}
 
 double EuroBewerter::put(double t, double T, double X0, double Strike, double r,
 		double delta, double sigma) {
@@ -137,15 +81,6 @@ double EuroBewerter::put(double t, double T, double X0, double Strike, double r,
 							- X0 * cnd(-d1)));
 }
 
-
-
-//double EuroBewerter::min_put(double t, double T, double* X0, int D,
-//		double Strike, double r, double delta, double sigma) {
-//	return max_call(double t, double T, double* X0, int D,
-//			double Strike, double r, double delta, double sigma)-;
-//}
-
-//Margrabes Formel
 double EuroBewerter::exchange_option(double x, double y, double t, double T,
 		double r, double delta, double sigma) {
 	// y to  be replaced
@@ -161,22 +96,6 @@ double EuroBewerter::exchange_option(double x, double y, double t, double T,
 	return erg * exp(-r * t);
 }
 
-//double EuroBewerter::exchange_option_diff(double x, double y, double t,
-//		double T, double r, double delta, double sigma, int re) {
-//	if (re == 0) {
-//		double h = 0.00001;
-//		double fh = exchange_option(x + h, y, t, T, r, delta, sigma);
-//		double f = exchange_option(x, y, t, T, r, delta, sigma);
-//		return (fh - f) / h;
-//	} else {
-//		double h = 0.00001;
-//		double fh = exchange_option(x, y + h, t, T, r, delta, sigma);
-//		double f = exchange_option(x, y, t, T, r, delta, sigma);
-//		return (fh - f) / h;
-//	}
-//}
-
-//auch getestet
 double EuroBewerter::exchange_option_diff(double x, double y, double t,
 		double T, double r, double delta, double sigma, int re) {
 
@@ -196,34 +115,28 @@ double EuroBewerter::exchange_option_diff(double x, double y, double t,
 				* (-cnd(d2) + (dnd(d2) - x / y * dnd(d1)) / Wurzel);
 }
 
-double EuroBewerter::european_MaxCall_ND(double* x, int D, double t, double T,
+double EuroBewerter::european_MaxCall_ND(vector<double> x, int D, double t, double T,
 		double Strike, double r, double delta, double sigma, double dt) {
-	if(D==1)return call(t,T,x[0],Strike,r,delta,sigma);
-	if(dt==0)return 0;
+	if(D==1) return call(t, T, x[0], Strike, r, delta, sigma);
+	if(dt==0) return 0;
 	double d_minus[D];
 	double d_plus[D];
+	
 	for (int d = 0; d < D; ++d) {
-		d_minus[d] = (log(x[d] / Strike) //sigma[d]
-		+ (r - delta - sigma * sigma / 2.) * (T - t)) / sigma //sigma[d]
-				/ sqrt(T - t + 0.000001);
-		d_plus[d] = d_minus[d] + sigma * sqrt(T - t); //sigma[d]
+		d_minus[d] = (log(x[d] / Strike) + (r - delta - sigma * sigma / 2.) * (T - t)) / sigma	/ sqrt(T - t + 0.000001);
+		d_plus[d] = d_minus[d] + sigma * sqrt(T - t); 
 	}
 
 	double erg = 0;
 	for (int l = 0; l < D; ++l) {
 		double integralSumme = 0;
 		double dz = dt;
-		//	printf("%f, %f, %f\n", d_plus, d_minus, t);
 		for (double z = -12; z < d_plus[l]; z += dz) {
 			double df = exp(-0.5 * z * z);
 			for (int l_Strich = 0; l_Strich < D; ++l_Strich)
 				if (l_Strich != l)
-					df *= cnd(log(x[l] / x[l_Strich]) / sigma  //sigma[l]
-							/ sqrt(T - t + 0.000001) - z + sigma * sqrt(T - t)); //sigma[l]
-					//		if(z==-3)printf("%f, %f\n",z, df);
+					df *= cnd(log(x[l] / x[l_Strich]) / sigma / sqrt(T - t + 0.000001) - z + sigma * sqrt(T - t)); 
 			integralSumme += df * dz;
-			//			if(df<0.0001 && rand()%1000==0)
-			//				printf("sehr klein bei %f\n",z);
 		}
 
 		erg += x[l] * exp(-delta * (T - t)) / sqrt(2 * 3.141592654)

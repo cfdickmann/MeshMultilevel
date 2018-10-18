@@ -2,8 +2,103 @@
 
 #include <stdlib.h>
 #include <string.h>
+#include "Hilfsmittel.h"
+#include "Linear_Regression.h"
 
 using namespace std;
+
+int AmericanOption::Mtraining(int l) {
+	return 25 * pow(2, l);
+}
+
+void AmericanOption::trainingpaths_regression(int l) {		
+	for (int n = N - 1; n > 0; --n) {
+		for (int m = 0; m < Mtraining(l); ++m) {
+			if (m % 10 == 0)
+				printf("Mesh Training Schritt %d %.0lf \%% \r", n,	(double) m / (double) Mtraining(l) * 100.);			
+	
+			double est = C_estimate_Mesh(X[l][m][n], n, l);
+			V[l][m][n] = max(est, payoff(X[l][m][n], n));
+		}
+	}
+}
+
+void AmericanOption::weights_erstellen(int ll) {
+	for (int n = 0; n < N - 1; ++n)
+		for (int l = 0; l < Mtraining(ll); ++l)
+			weights[ll][n][l] = kernelD(X0, X[ll][l][n + 1],
+					dt * (double) (n + 1));
+
+	for (int n = 0; n < N - 1; ++n)
+		for (int l = 0; l < Mtraining(ll); ++l) {
+			weight_sum[ll][n][l] = 0;
+			for (int m = 0; m < Mtraining(ll); ++m)
+				weight_sum[ll][n][l] += kernelD(X[ll][m][n], X[ll][l][n + 1], dt);
+		}
+}
+
+double phi(double x) {
+	static double FF = 1. / sqrt(2. * 3.141592653);
+	return FF * exp(-(x * x) / 2.);
+}
+
+double AmericanOption::kernelD(vector<double> von, vector<double> nach, double dt) {
+	double produkt = 1.;
+	for (int d = 0; d < D; ++d) {
+		double ratio = nach[d] / von[d];
+		double klammer = (log(ratio) - (r - delta - 0.5 * sigma[d] * sigma[d]) * dt)/ (sigma[d] * sqrt(dt));
+		produkt *= phi(klammer) / (sigma[d] * sqrt(dt) * nach[d]);
+	}
+	return produkt;
+}
+
+double AmericanOption::C_estimate_Mesh(vector<double> x, int Etime, int l) {	
+	if (Etime == N - 1)
+		return 0;
+
+	double int_dt = 0.002;
+
+	double v = EB.european_MaxCall_ND(x, D, (double) (Etime) * (dt), //gutes
+	(double) (Etime + 1) * dt, Strike, r, delta, sigma[0], int_dt);
+
+	vector<double> weightsss=vector<double>(Mtraining(l));
+	vector<double> y=vector<double>(Mtraining(l));
+	vector<double> cv=vector<double>(Mtraining(l));
+	
+	for (int k = 0; k < Mtraining(l); ++k) {
+		double K = kernelD(x, X[l][k][Etime + 1], dt) / weight_sum[l][Etime][k];
+		double CV = exp(-r * (double) (Etime + 1) * dt)	* std::max(Max(X[l][k][Etime + 1]) - Strike, 0.);	// gutes
+		weightsss[k]=(K / (double) (Mtraining(l) * Mtraining(l)));
+		y[k]=V[l][k][Etime + 1];
+		cv[k]=CV;
+	}
+
+	if (int_dt == 0)
+		return mittelwert(y);
+		
+	return RegressionV(y, cv, weightsss, v); 
+}
+
+void AmericanOption::Daten() {
+	int Example = 3;
+
+	X0 = vector<double>();
+	sigma = vector<double>();
+
+	if (Example == 3) { //Glasserman Example MaxCall
+		option = MAX_CALL;
+		delta = 0.1;
+		D = 2; //Achtung!
+		for (int j = 0; j < D; ++j) {
+			X0.push_back( 90.0);
+			sigma.push_back(0.2);
+		}
+		Strike = 100.;
+		r = 0.05;
+		T = 3;
+		N = 10;
+	}
+}
 
 AmericanOption::AmericanOption() {
 	Daten();
@@ -11,41 +106,39 @@ AmericanOption::AmericanOption() {
 }
 
 AmericanOption::~AmericanOption() {
-	delete[] X0; // Spot
-	delete[] sigma; //Volatility
+
 }
 
-double AmericanOption::payoff(double* x, int time) {
+double AmericanOption::payoff(vector<double> x, int time) {
+		
+	printf("max: %f, ",Max(x));
 	if (option == MIN_PUT)
-		return std::max(Strike - Min(x, D), 0.) * exp(-r * dt * (double) (time)); //Min Put
+		return std::max(Strike - Min(x), 0.) * exp(-r * dt * (double) (time)); //Min Put
 	if (option == MAX_CALL)
-		return std::max(Max(x, D) - Strike, 0.) * exp(-r * dt * (double) (time)); //Max Call
+		return std::max(Max(x) - Strike, 0.) * exp(-r * dt * (double) (time)); //Max Call
 
 	printf("ERROR, option unknown!\n");
 	exit(0);
 	return -1;
 }
 
-void AmericanOption::Pfadgenerieren(double** X, int start, double* S,
-		RNG* generator) {
-	double** wdiff = DoubleFeld(N, D);
+void AmericanOption::Pfadgenerieren(vector<vector<double>> X, int start, vector<double> S,		RNG* generator) {
+	vector<vector<double>> wdiff = DoubleFeld(N, D);
+	
 	for (int n = 0; n < N; ++n)
 		for (int d = 0; d < D; ++d)
 			wdiff[n][d] = sqrt(dt) * generator->nextGaussian();
+			
 	Pfadgenerieren(X, wdiff, start, S);
-	deleteDoubleFeld(wdiff, N, D);
 }
 
-void AmericanOption::Pfadgenerieren(double** X, double** wdiff, int start,
-		double * S) {
+void AmericanOption::Pfadgenerieren(vector<vector<double>> X, vector<vector<double>> wdiff, int start,
+		vector<double> S) {
 	for (int d = 0; d < D; ++d)
 		X[start][d] = S[d];
 	for (int d = 0; d < D; ++d) {
 		for (int n = start + 1; n < N; ++n) {
-			X[n][d] = X[n - 1][d]
-					* exp(
-							(((r - delta) - 0.5 * sigma[d] * sigma[d]) * dt
-									+ sigma[d] * wdiff[n][d]));
+			X[n][d] = X[n - 1][d]* exp(	(((r - delta) - 0.5 * sigma[d] * sigma[d]) * dt	+ sigma[d] * wdiff[n][d]));
 		}
 	}
 }

@@ -19,13 +19,16 @@
 #define HILFSMITTEL_H_
 using namespace std;
 
-int argMin(double* v, int l);
-int argZweiter(double* v, int l);
-int argDritter(double* v, int l);
-int argMax(double* v, int l);
+int argMin(vector<double> v);
+int argZweiter(vector<double> v);
+int argDritter(vector<double> v);
+int argMax(vector<double> v);
+
+double Min(vector<double> v);
+double Max(vector<double> v);
 
 void MatrixAusgeben(double**  a, int D);
-double** MatrixMultiplizieren(double**  a,double**  b,int D);
+vector<vector<double>> MatrixMultiplizieren(vector<vector<double>> a,vector<vector<double>>  b,int D);
 double betrag(double x);
 
 void BubbleSort(double* werte, int* index, int l);
@@ -42,12 +45,10 @@ int* partialsort(vector<double> vec, int n);
 int* array_machen(int z);
 //int hargMax(double* v, int l, int ll);
 //int hMax(double* v, int l, int ll);
-
-double Max(double* v, int l);
 double* LGSloesen(double** A, double* b, int Mphi);
 double* LGS_mit_alglib_loesen(double** A, double* b, int Mphi);
 
-double Min(double* v, int l);
+
 void ErgebnisAnhaengen(double d);
 void ErgebnisAnhaengenML(double d);
 double* alphasLaden(int K);
@@ -57,24 +58,14 @@ void ErgebnisAnhaengen(double d, char* filename);
 
 //double qnorm(double p);
 
-int * IntFeld(int m);
-int ** IntFeld(int m,int n);
-int *** IntFeld(int m,int n,int o);
-double * DoubleFeld(int m);
-double ** DoubleFeld(int m,int n);
-double *** DoubleFeld(int m, int n, int o);
-double **** DoubleFeld(int m, int n, int o, int p);
-double ***** DoubleFeld(int m, int n, int o, int p, int q);
-
-void deleteDoubleFeld(double * D, int m);
-void deleteDoubleFeld(double ** D  ,int m,int n);
-void deleteDoubleFeld(double *** D  ,int m, int n, int o);
-void deleteDoubleFeld(double **** D , int m, int n, int o, int p);
-void deleteDoubleFeld(double ***** D, int m, int n, int o, int p, int q);
-
-void deleteIntFeld(int * D, int m);
-void deleteIntFeld(int ** D  ,int m,int n);
-void deleteIntFeld(int *** D  ,int m,int n,int o);
+vector<int> IntFeld(int m);
+vector<vector<int>> IntFeld(int m,int n);
+vector<vector<vector<int>>> IntFeld(int m,int n,int o);
+vector<double>  DoubleFeld(int m);
+vector<vector<double>> DoubleFeld(int m,int n);
+vector<vector<vector<double>>> DoubleFeld(int m, int n, int o);
+vector<vector<vector<vector<double>>>> DoubleFeld(int m, int n, int o, int p);
+vector<vector<vector<vector<vector<double>>>>> DoubleFeld(int m, int n, int o, int p, int q);
 
 double** faurepts(int n0, int npts, int d, int b);
 void ausgeben(double* x, int j);

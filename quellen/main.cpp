@@ -16,8 +16,8 @@ using namespace std;
 
 void AmericanOption::trainingpaths_erstellen(int l) {
 	RNG generator;
-	//generator.setSeed(7);
-	double** wdiff = DoubleFeld(N, D);
+    generator.setSeed(time(NULL));
+	vector<vector<double>> wdiff = DoubleFeld(N, D);
 	for (int m = 0; m < Mtraining(l); ++m) {
 		if (l == 0 || m >= Mtraining(l - 1)) {
 			for (int d = 0; d < D; ++d)
@@ -32,7 +32,6 @@ void AmericanOption::trainingpaths_erstellen(int l) {
 				for (int n = 0; n < N; ++n)
 					X[l][m][n][d] = X[l - 1][m][n][d];
 	}
-	deleteDoubleFeld(wdiff, N, D);
 }
 
 void AmericanOption::ErgebnisseAusgeben(int l) {
@@ -63,30 +62,33 @@ void AmericanOption::ErgebnisseAusgeben(int l) {
 void AmericanOption::printInfo() {
 	double sum = 0;
 	for (int l = 0; l < L; ++l) {
-		printf("Level %d:\t %.5lf (%.5lf) \t %d Pfade", l,
-				mittelwert(Levelergs[l]), varianz(Levelergs[l]),
-//				RegressionV(Levelergs[l],cv[l],EB.european_MaxCall_ND(X0,D,0,T,Strike,r,delta,sigma[0],0.001)),
-				(int) Levelergs[l].size());
-		if (n != NULL)
+		printf("Level %d:\t %.5lf (%.5lf) \t %d Pfade", 
+		l, 
+		mittelwert(Levelergs[l]), 
+		varianz(Levelergs[l]),
+		(int) Levelergs[l].size());
+		
+		if(n.size()>0)
 			printf(" n=%d ", n[l]);
 		printf("\n");
+		
 		sum += mittelwert(Levelergs[l]);
 	}
+	
 	printf("sum=%f\n", sum);
 	printf("\n\n");
 }
 
 void AmericanOption::addLevelPath(int l) {
 	static RNG generator;
-	double** XX = NULL;
-	double ** wdiff = NULL;
 
-	wdiff = DoubleFeld(N, D);
-	XX = DoubleFeld(N, D);
+	vector<vector<double>>	wdiff = DoubleFeld(N, D);
+	vector<vector<double>>	XX = DoubleFeld(N, D);
 
 	for (int d = 0; d < D; ++d)
 		for (int n = 0; n < N; ++n)
 			wdiff[n][d] = generator.nextGaussian() * sqrt(dt);
+			
 	Pfadgenerieren(XX, wdiff, 0, X0);
 	double e1 = Pfad(XX, l);
 
@@ -99,18 +101,17 @@ void AmericanOption::addLevelPath(int l) {
 	Levelergs[l].push_back(e1);
 
 //	Levelergs[l].push_back(0.5 * (e1 + e2));
-
-	deleteDoubleFeld(XX, N, D);
-	deleteDoubleFeld(wdiff, N, D);
 }
 
-double AmericanOption::Pfad(double ** XX, int l) {
+double AmericanOption::Pfad(vector<vector<double>> XX, int l) 
+{
 	double erg = 0;
-//int stopp=N-1;
 
 	for (int n = 0; n < N; ++n) {
 		if (payoff(XX[n], n) > 0 || n == N - 1)
 			if (payoff(XX[n], n) >= C_estimate_Mesh(XX[n], n, l)) {
+				
+				printf("1: %f, %d, ", payoff(XX[n], n),l);
 				erg += payoff(XX[n], n);
 				erg -=
 						1.2
@@ -133,6 +134,7 @@ double AmericanOption::Pfad(double ** XX, int l) {
 			if (payoff(XX[n], n) > 0 || n == N - 1)
 				if (payoff(XX[n], n) >= C_estimate_Mesh(XX[n], n, l - 1)) {
 					erg -= payoff(XX[n], n);
+						printf("2: %f, %d, ",payoff(XX[n], n),l);
 					erg += 1.2
 							* (EB.european_MaxCall_ND(XX[n], D,
 									(double) (n) * dt, T, Strike, r, delta,
@@ -159,7 +161,7 @@ void AmericanOption::simplified() {
 
 	double eps = 0.05;
 	int maxL = 15;
-	n = new int[maxL];
+	n = vector<int>(maxL);
 
 	dt = T / (double) (N - 1);
 	X = DoubleFeld(maxL, Mtraining(maxL - 1), N, D);
@@ -167,8 +169,8 @@ void AmericanOption::simplified() {
 	weights = DoubleFeld(maxL, N, Mtraining(maxL - 1));
 	weight_sum = DoubleFeld(maxL, N, Mtraining(maxL - 1));
 
-	Levelergs = new vector<double> [maxL];
-	LevelergsFiner = new vector<double> [maxL];
+	Levelergs =  vector<vector<double>> (maxL);
+	LevelergsFiner =  vector<vector<double>> (maxL);
 
 	L = 1;
 
@@ -228,7 +230,7 @@ double kappa1=1.;
 		}
 	}
 
-	double summe = 0;
+	/*double summe = 0;
 	for (int l = 0; l < L; ++l)
 		summe += mittelwert(Levelergs[l]);
 	ofstream File("simpergs.txt", ios::out | ios::app);
@@ -269,12 +271,11 @@ double kappa1=1.;
 		F_ML_testing << comp_ML_testing / 1000000. << endl;
 
 	for (int l = 0; l < L; ++l)
-			ErgebnisseAusgeben(l);
+			ErgebnisseAusgeben(l);*/
 }
 
 void AmericanOption::run() {
 	Daten();
-
 	L = 4;
 	dt = T / (double) (N - 1);
 	X = DoubleFeld(L, Mtraining(L - 1), N, D);
@@ -282,15 +283,14 @@ void AmericanOption::run() {
 	weights = DoubleFeld(L, N, Mtraining(L - 1));
 	weight_sum = DoubleFeld(L, N, Mtraining(L - 1));
 
-	n = NULL;
-	Levelergs = new vector<double> [L];
-	LevelergsFiner = new vector<double> [L];
-
+	Levelergs = vector<vector<double>> (L);
+	LevelergsFiner = vector<vector<double>>(L);
+	
 	for (int l = 0; l < L; ++l) {
 		printf("Level %d: %d training paths \n", l, Mtraining(l));
 		trainingpaths_erstellen(l);
 		weights_erstellen(l);
-		trainingpaths_regression(l); // Mesh
+		trainingpaths_regression(l);
 	}
 
 	for (int kk = 0; kk < 10; ++kk) {
@@ -307,11 +307,11 @@ void AmericanOption::run() {
 int main(int argc, char* args[]) {
 	AmericanOption AMO;
 
-	if (argc > 1) {
-		string arg = args[1];
-		if (!arg.compare("-simp"))
-			AMO.simplified();
-	} else
+	//if (argc > 1) {
+	//	string arg = args[1];
+	//	if (!arg.compare("-simp"))
+	//		AMO.simplified();
+	//} else
 		AMO.run();
 }
 
