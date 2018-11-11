@@ -1,10 +1,3 @@
-/*
- * Linear_Regression.cpp
- *
- *  Created on: Sep 27, 2013
- *      Author: cfdickmann
- */
-
 #include "Linear_Regression.h"
 #include <stdio.h>
 #include <math.h>
@@ -114,32 +107,11 @@ double RegressionV(vector<double> X, vector<double> CV, vector<double> weights,
 	if (verbose)
 		printf("  #### Regression X~a+b*CV durchgefuehrt, a=%f, b=%f ####  \n",
 				alpha, beta);
-
-//	double zaehler = 0;
-//	for (int i = 0; i < (int) X.size(); ++i) {
-//	zaehler+=  weights.at(i) * X.at(i) - beta * weights.at(i) * CV.at(i)
-//				+ ECV * beta * weights.at(i);
-//	}
-//
-//	double nenner = 0;
-//	for (int i = 0; i < (int) X.size(); ++i)
-//		nenner += weights.at(i);
-//
-//	printf("kkontrollwert:%f\n", zaehler / nenner);
-
-	return alpha + beta * ECV;
+        
+    return alpha + beta * ECV;
 }
 
 double* gausseidel(double** A, double* b, int K, int iterationen) {
-// printf("A(%d,%d):\n",K,K);
-// for (int k = 0; k < K; ++k)
-// for (int j = 0; j < K; ++j)
-// printf("%f, ", A[k][j]);
-// printf("b:\n");
-//
-// for (int j = 0; j < K; ++j)
-// printf("%f, ", b[j]);
-// printf("\n");
 	double* x = new double[K];
 	double* x_neu = new double[K];
 	for (int k = 0; k < K; ++k) {
@@ -164,8 +136,8 @@ double* gausseidel(double** A, double* b, int K, int iterationen) {
 		}
 		for (int k = 0; k < K; ++k)
 			x[k] = x_neu[k];
-//printf("fehler %f \n", fehler);
 	}
+	
 	delete[] x_neu;
 	return x;
 }
@@ -213,7 +185,6 @@ double RegressionV2(vector<double> X, vector<double> CV1, vector<double> CV2,
 		b[2] += CV2.at(p) * X.at(p) * w;
 	}
 
-//	double* lsg = LGS_2x2_loesen111(A, b);
 	double* lsg = gausseidel(A, b, 3);
 
 	double alpha = lsg[0];
@@ -226,10 +197,7 @@ double RegressionV2(vector<double> X, vector<double> CV1, vector<double> CV2,
 	delete[] A;
 	delete[] b;
 	if (verbose)
-		printf(
-				"  #### Regression X~a+b*CV1+c*CV2 durchgefuehrt, a=%f, b=%f, c=%f ####  \n",
-				alpha, beta, gamma);
+		printf(	"  #### Regression X~a+b*CV1+c*CV2 durchgefuehrt, a=%f, b=%f, c=%f ####  \n",	alpha, beta, gamma);
 
 	return alpha + beta * ECV1 + gamma * ECV2;
 }
-

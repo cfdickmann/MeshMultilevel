@@ -1,10 +1,3 @@
-/*
- * Linear_Regression.h
- *
- *  Created on: Sep 27, 2013
- *      Author: cfdickmann
- */
-
 #ifndef LINEAR_REGRESSION_H_
 #define LINEAR_REGRESSION_H_
 

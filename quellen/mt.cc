@@ -261,3 +261,4 @@ void MersenneTwister::print(void)
         std::cout << "]" << std::endl;
     }
 }
+
