@@ -52,7 +52,7 @@ double mittelwert(vector<double> vec) {
 	return erg / vec.size();
 }
 
-void MatrixAusgeben(vector<vector<double>> a, int D) {
+void MatrixAusgeben(double** a, int D) {
 	printf("\n");
 	for (int d = 0; d < D; ++d) {
 		for (int f = 0; f < D; ++f)
@@ -61,8 +61,8 @@ void MatrixAusgeben(vector<vector<double>> a, int D) {
 	}
 }
 
-vector<vector<double>> MatrixMultiplizieren(vector<vector<double>> a, vector<vector<double>> b, int D) {
-	vector<vector<double>> erg = DoubleFeld(D, D);
+double** MatrixMultiplizieren(double** a, double** b, int D) {
+	double** erg = DoubleFeld(D, D);
 	for (int d = 0; d < D; ++d)
 		for (int f = 0; f < D; ++f) {
 			double summe = 0;
@@ -127,10 +127,10 @@ void alphasSchreiben(double* alpha, int K) {
 	f.close();
 }
 
-int argMin(vector<double> v) {
+int argMin(double* v, int l) {
 	double minimum = v[0];
 	int minimum_j = 0;
-	for (int j = 1; j < v.size(); ++j)
+	for (int j = 1; j < l; ++j)
 		if (v[j] < minimum) {
 			minimum_j = j;
 			minimum = v[j];
@@ -179,10 +179,10 @@ void BubbleSort(double* werte, int* index, int l) {
 	}
 }
 
-int argMax(vector<double> v) {
+int argMax(double* v, int l) {
 	double maximum = v[0];
 	int maximum_j = 0;
-	for (int j = 1; j < v.size(); ++j)
+	for (int j = 1; j < l; ++j)
 		if (v[j] > maximum) {
 			maximum_j = j;
 			maximum = v[j];
@@ -190,12 +190,12 @@ int argMax(vector<double> v) {
 	return maximum_j;
 }
 
-int argZweiter(vector<double>v) {
+int argZweiter(double *v, int l) {
 	double maximum = -10000000;
-	double max = argMax(v);
+	double max = argMax(v, l);
 
 	int argZwe = 0;
-	for (int j = 0; j < v.size(); ++j)
+	for (int j = 0; j < l; ++j)
 		if (v[j] > maximum && j != max) {
 			argZwe = j;
 			maximum = v[j];
@@ -203,12 +203,12 @@ int argZweiter(vector<double>v) {
 	return argZwe;
 }
 
-int argDritter(vector<double>v) {
+int argDritter(double *v, int l) {
 	double maximum = -10000000;
-	double max = argMax(v);
-	double zwe = argZweiter(v);
+	double max = argMax(v, l);
+	double zwe = argZweiter(v, l);
 	int argZwe = 0;
-	for (int j = 0; j < v.size(); ++j)
+	for (int j = 0; j < l; ++j)
 		if (v[j] > maximum && j != max && j != zwe) {
 			argZwe = j;
 			maximum = v[j];
@@ -230,12 +230,12 @@ void InPipeSchreiben(int* pipe, double wert) {
 ////	return atof(readbuffer);
 //}
 
-double Max(vector<double> v) {
-	return v[argMax(v)];
+double Max(double* v, int l) {
+	return v[argMax(v, l)];
 }
 
-double Min(vector<double> v) {
-	return v[argMin(v)];
+double Min(double* v, int l) {
+	return v[argMin(v, l)];
 }
 
 ////double qnorm(double p) {
@@ -339,63 +339,100 @@ double CumulativeNormalDistribution(double x) {
 	return (1. - neg) * y + neg * (1. - y);
 }
 
-
-vector<int> IntFeld(int m) {
-	return vector<int>(m);
-}
-
-vector<vector<int>> IntFeld(int m, int n) {
-	vector<vector<int>> erg = vector<vector<int>>(m);
-	for (int i = 0; i < m; ++i)
-		erg[i] = vector<int>(n);
+int * IntFeld(int m) {
+	int* erg = new int[m];
 	return erg;
 }
 
-vector<vector<vector<int>>>  IntFeld(int m, int n, int o) {
-	vector<vector<vector<int>>> erg = vector<vector<vector<int>>>(m);
+int ** IntFeld(int m, int n) {
+	int** erg = new int*[m];
+	for (int i = 0; i < m; ++i)
+		erg[i] = IntFeld(n);
+	return erg;
+}
+
+int *** IntFeld(int m, int n, int o) {
+	int*** erg = new int**[m];
 	for (int i = 0; i < m; ++i)
 		erg[i] = IntFeld(n, o);
 	return erg;
 }
 
-vector<vector<vector<vector<int>>>> IntFeld(int m, int n, int o, int p) {
-	vector<vector<vector<vector<int>>>> erg = vector<vector<vector<vector<int>>>>(m);
-	for (int i = 0; i < m; ++i)
-		erg[i] = IntFeld(n, o, p);
+double * DoubleFeld(int m) {
+	double* erg = new double[m];
 	return erg;
 }
 
-
-vector<double> DoubleFeld(int m) {
-	return vector<double>(m);
-}
-
-vector<vector<double>> DoubleFeld(int m, int n) {
-	vector<vector<double>> erg = vector<vector<double>>(m);
+double ** DoubleFeld(int m, int n) {
+	double** erg = new double*[m];
 	for (int i = 0; i < m; ++i)
-		erg[i] = vector<double>(n);
+		erg[i] = new double[n];
 	return erg;
 }
 
-vector<vector<vector<double>>>  DoubleFeld(int m, int n, int o) {
-	vector<vector<vector<double>>> erg = vector<vector<vector<double>>>(m);
+double *** DoubleFeld(int m, int n, int o) {
+	double*** erg = new double**[m];
 	for (int i = 0; i < m; ++i)
 		erg[i] = DoubleFeld(n, o);
 	return erg;
 }
 
-vector<vector<vector<vector<double>>>> DoubleFeld(int m, int n, int o, int p) {
-	vector<vector<vector<vector<double>>>> erg = vector<vector<vector<vector<double>>>>(m);
+double **** DoubleFeld(int m, int n, int o, int p) {
+	double **** erg = new double ***[m];
 	for (int i = 0; i < m; ++i)
 		erg[i] = DoubleFeld(n, o, p);
 	return erg;
 }
 
-vector<vector<vector<vector<vector<double>>>>> DoubleFeld(int m, int n, int o, int p, int q) {
-	vector<vector<vector<vector<vector<double>>>>> erg = vector<vector<vector<vector<vector<double>>>>>(m);
+double ***** DoubleFeld(int m, int n, int o, int p, int q) {
+	double ***** erg = new double****[m];
 	for (int i = 0; i < m; ++i)
 		erg[i] = DoubleFeld(n, o, p, q);
 	return erg;
+}
+
+void deleteDoubleFeld(double * D, int m) {
+	delete[] D;
+}
+
+void deleteDoubleFeld(double ** D, int m, int n) {
+	for (int i = 0; i < m; ++i)
+		deleteDoubleFeld(D[i], n);
+	delete[] D;
+}
+
+void deleteDoubleFeld(double *** D, int m, int n, int o) {
+	for (int i = 0; i < m; ++i)
+		deleteDoubleFeld(D[i], n, o);
+	delete[] D;
+}
+
+void deleteDoubleFeld(double **** D, int m, int n, int o, int p) {
+	for (int i = 0; i < m; ++i)
+		deleteDoubleFeld(D[i], n, o, p);
+	delete[] D;
+}
+
+void deleteDoubleFeld(double ***** D, int m, int n, int o, int p, int q) {
+	for (int i = 0; i < m; ++i)
+		deleteDoubleFeld(D[i], n, o, p, q);
+	delete[] D;
+}
+
+void deleteIntFeld(int * D, int m) {
+	delete[] D;
+}
+
+void deleteIntFeld(int ** D, int m, int n) {
+	for (int i = 0; i < m; ++i)
+		deleteIntFeld(D[i], n);
+	delete[] D;
+}
+
+void deleteIntFeld(int *** D, int m, int n, int o) {
+	for (int i = 0; i < m; ++i)
+		deleteIntFeld(D[i], n, o);
+	delete[] D;
 }
 
 int* array_machen(int z) {

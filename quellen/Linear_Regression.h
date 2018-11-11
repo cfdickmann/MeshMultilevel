@@ -22,10 +22,8 @@ double RegressionV(vector<double> X, vector<double> CV, double ECV);
 double RegressionV(vector<double> X, vector<double> CV, double ECV, bool verbose) ;
 double RegressionV(vector<double> X,vector<double> CV,vector<double> weights, double ECV, bool verbose);
 
-
 double* gausseidel(double** A, double* b, int K, int iterationen);
 double* gausseidel(double** A, double* b, int K);
-double RegressionV2(vector<double> X, vector<double> CV1, vector<double> CV2,
-		vector<double> weights, double ECV1, double ECV2, bool verbose);
+double RegressionV2(vector<double> X, vector<double> CV1, vector<double> CV2, vector<double> weights, double ECV1, double ECV2, bool verbose);
 
 #endif /* LINEAR_REGRESSION_H_ */

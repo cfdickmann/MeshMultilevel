@@ -1,14 +1,6 @@
-/*
- * EuroBewerter.h
- *
- *  Created on: May 21, 2013
- *      Author: cfdickmann
- */
-
 #ifndef EUROBEWERTER_H_
 #define EUROBEWERTER_H_
 
-#include <vector>
 namespace std {
 
 class EuroBewerter {
@@ -40,7 +32,7 @@ public:
 //			double T, double r, double delta, double sigma, int re);
 
 
-	double european_MaxCall_ND(vector<double> x, int D, double t, double T,double Strike, double r, double delta,
+	double european_MaxCall_ND(double* x, int D, double t, double T,double Strike, double r, double delta,
 			double sigma,
 			double dt);
 
