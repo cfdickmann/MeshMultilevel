@@ -102,9 +102,7 @@ double AmericanOption::Pfad(double ** XX, int l) {
 		if (payoff(XX[n], n) > 0 || n == N - 1)
 			if (payoff(XX[n], n) >= C_estimate_Mesh(XX[n], n, l)) {
 				erg += payoff(XX[n], n);
-					erg -=1.2* (EB.european_MaxCall_ND(XX[n], D,
-										(double) (n) * dt, T, Strike, r, delta,
-										sigma[0], 0.001) - 6.65509);
+					erg -=1.2* (EB.european_MaxCall_ND(XX[n], D, (double) (n) * dt, T, Strike, r, delta, sigma[0], 0.1/(double)Mtraining(l)) - 6.65509);
 				break;
 			}
 	}
@@ -116,9 +114,7 @@ double AmericanOption::Pfad(double ** XX, int l) {
 			if (payoff(XX[n], n) > 0 || n == N - 1)
 				if (payoff(XX[n], n) >= C_estimate_Mesh(XX[n], n, l - 1)) {
 					erg -= payoff(XX[n], n);
-					erg += 1.2* (EB.european_MaxCall_ND(XX[n], D,
-									(double) (n) * dt, T, Strike, r, delta,
-									sigma[0], 0.001) - 6.65509);
+					erg += 1.2* (EB.european_MaxCall_ND(XX[n], D, (double) (n) * dt, T, Strike, r, delta, sigma[0], 0.1/(double)Mtraining(l)) - 6.65509);
 
 					break;
 				}
@@ -173,7 +169,6 @@ void AmericanOption::simplified() {
 					pow((double) Mtraining(ll), -kappa2)
 							* varianz(Levelergs[ll]));
 			n[ll] = ceil(3. / eps / eps * vorder * hinter);
-			//	printf("vorder= %.30lf, hinter=%.30lf\n", vorder, hinter);
 			printf("\n\nn[%d]=%d\n", L - 1, n[L - 1]);
 		}
 		done = true;
@@ -205,6 +200,7 @@ void AmericanOption::simplified() {
 	double summe = 0;
 	for (int l = 0; l < L; ++l)
 		summe += mittelwert(Levelergs[l]);
+		
 	ofstream File("simpergs.txt", ios::out | ios::app);
 	if (File.is_open())
 		File << summe << endl;
@@ -212,12 +208,14 @@ void AmericanOption::simplified() {
 	ofstream FileLN("numberOfLevels.txt", ios::out | ios::app);
 	if (FileLN.is_open())
 		FileLN << L << endl;
+		
 	double totalvar = 0;
 	for (int l = 0; l < L; ++l)
 		totalvar += varianz(Levelergs[l]) / n[l];
+		
 	double comp_MC_training = pow(Mtraining(L - 1), kappa2 + 1);
-	double comp_MC_testing =  3./eps/eps*varianz(LevelergsFiner[L - 1])
-			* pow(Mtraining(L - 1),kappa2);
+	double comp_MC_testing =  3./eps/eps*varianz(LevelergsFiner[L - 1])			* pow(Mtraining(L - 1),kappa2);
+	
 	ofstream File_MC_training("MC_training.txt", ios::out | ios::app);
 	if (File_MC_training.is_open())
 		File_MC_training << comp_MC_training / 1000000. << endl;
@@ -264,10 +262,10 @@ void AmericanOption::run() {
 		printf("Level %d: %d training paths \n", l, Mtraining(l));
 		trainingpaths_erstellen(l);
 		weights_erstellen(l);
-		trainingpaths_regression(l); // Mesh
+		trainingpaths_regression(l);
 	}
 
-	for (int kk = 0; kk < 100; ++kk) {
+	for (int kk = 0; kk < 10; ++kk) {		
 		for (int i = 0; i < 100; ++i)
 			for (int l = 0; l < L; ++l)
 				addLevelPath(l);

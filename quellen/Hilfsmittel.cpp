@@ -13,24 +13,8 @@
 #include <functional>
 #include <vector>
 #include <stdlib.h>
-//#include "../alglib/ap.h"
-//#include "../alglib/linalg.h"
-//#include "../alglib/solvers.h"
 #include "AmericanOption.h"
-//using namespace alglib;
 using namespace std;
-//
-//double varianz(vector<double> vec){
-//	if(vec.size()==0)return 0;
-//	double erg=0;
-//	double ergQ;
-//	for(unsigned i=0;i<vec.size();++i)
-//	{
-//		erg+=vec.at(i);
-//		ergQ+=pow(vec.at(i),2);
-//	}
-//	return (ergQ/(double)vec.size())-pow(erg/(double)vec.size(),2);
-//}
 
 double varianz(vector<double> vec) {
 	if (vec.size() == 0)
@@ -216,20 +200,6 @@ int argDritter(double *v, int l) {
 	return argZwe;
 }
 
-void InPipeSchreiben(int* pipe, double wert) {
-//	close(pipe[0]);
-//	char string[20];
-//	sprintf(string, "%f", wert);
-//	write(pipe[1], string, (strlen(string) + 1));
-}
-//
-//double AusPipeLesen(int* pipe) {
-////	close(pipe[1]);
-////	char readbuffer[200];
-////	read(pipe[0], readbuffer, sizeof(readbuffer));
-////	return atof(readbuffer);
-//}
-
 double Max(double* v, int l) {
 	return v[argMax(v, l)];
 }
@@ -237,84 +207,6 @@ double Max(double* v, int l) {
 double Min(double* v, int l) {
 	return v[argMin(v, l)];
 }
-
-////double qnorm(double p) {
-//	/** * @(#)qnorm.js * * Copyright (c) 2000 by Sundar Dorai-Raj
-//	 * * @author Sundar Dorai-Raj
-//	 * * Email: sdoraira@vt.edu
-//	 * * This program is free software; you can redistribute it and/or
-//	 * * modify it under the terms of the GNU General Public License
-//	 * * as published by the Free Software Foundation; either version 2
-//	 * * of the License, or (at your option) any later version,
-//	 * * provided that any use properly credits the author.
-//	 * * This program is distributed in the hope that it will be useful,
-//	 * * but WITHOUT ANY WARRANTY; without even the implied warranty of
-//	 * * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
-//	 * * GNU General Public License for more details at http://www.gnu.org * * */
-//	// ALGORITHM AS 111, APPL.STATIST., VOL.26, 118-121, 1977.
-//	// Computes z=invNorm(p)
-//	//	double split = 0.42;
-//	//	double a0 = 2.50662823884, a1 = -18.61500062529, a2 = 41.39119773534;
-//	//	double a3 = -25.44106049637, b1 = -8.47351093090, b2 = 23.08336743743;
-//	//	double b3 = -21.06224101826, b4 = 3.13082909833;
-//	//	double c0 = -2.78718931138, c1 = -2.29796479134, c2 = 4.85014127135;
-//	//	double c3 = 2.32121276858, d1 = 3.54388924762, d2 = 1.63706781897;
-//	//	double q = p - 0.5;double rr = 0;double ppnd = 0;
-//	//	if (fabs(q) <= split) {
-//	//		rr = q * q;
-//	//		ppnd = q * (((a3 * rr + a2) * rr + a1) * rr + a0) / ((((b4 * rr + b3) * rr + b2) * rr + b1) * rr + 1);
-//	//	} else {
-//	//		rr = p;
-//	//		if (q > 0)
-//	//			rr = 1 - p;
-//	//		if (rr > 0) {
-//	//			rr = sqrt(-log(rr));
-//	//			ppnd = (((c3 * rr + c2) * rr + c1) * rr + c0) / ((d2 * rr + d1) * rr + 1);
-//	//			if (q < 0)
-//	//				ppnd = -ppnd;
-//	//		} else
-//	//			ppnd = 0;
-//	//	}
-//	//	return (ppnd);
-//
-//	/** * @(#)qnorm.js * * Copyright (c) 2000 by Sundar Dorai-Raj
-//	 * * @author Sundar Dorai-Raj
-//	 * * Email: sdoraira@vt.edu
-//	 * * This program is free software; you can redistribute it and/or
-//	 * * modify it under the terms of the GNU General Public License
-//	 * * as published by the Free Software Foundation; either version 2
-//	 * * of the License, or (at your option) any later version,
-//	 * * provided that any use properly credits the author.
-//	 * * This program is distributed in the hope that it will be useful,
-//	 * * but WITHOUT ANY WARRANTY; without even the implied warranty of
-//	 * * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
-//	 * * GNU General Public License for more details at http://www.gnu.org * * */
-//	// ALGORITHM AS 111, APPL.STATIST., VOL.26, 118-121, 1977.
-//	// Computes z=invNorm(p)
-//	double split = 0.42;
-//	double a0 = 2.50662823884, a1 = -18.61500062529, a2 = 41.39119773534;
-//	double a3 = -25.44106049637, b1 = -8.47351093090, b2 = 23.08336743743;
-//	double b3 = -21.06224101826, b4 = 3.13082909833;
-//	double c0 = -2.78718931138, c1 = -2.29796479134, c2 = 4.85014127135;
-//	double c3 = 2.32121276858, d1 = 3.54388924762, d2 = 1.63706781897;
-//	double q = p - 0.5;double rr = 0;double ppnd = 0;
-//	if (abs(q) <= split) {
-//		rr = q * q;
-//		ppnd = q * (((a3 * rr + a2) * rr + a1) * rr + a0) / ((((b4 * rr + b3) * rr + b2) * rr + b1) * rr + 1);
-//	} else {
-//		rr = p;
-//		if (q > 0)
-//			rr = 1 - p;
-//		if (rr > 0) {
-//			rr = sqrt(-log(rr));
-//			ppnd = (((c3 * rr + c2) * rr + c1) * rr + c0) / ((d2 * rr + d1) * rr + 1);
-//			if (q < 0)
-//				ppnd = -ppnd;
-//		} else
-//			ppnd = 0;
-//	}
-//	return (ppnd);
-//}
 
 double max(double x, double y) {
 	return x < y ? y : x;

@@ -5,7 +5,7 @@
 using namespace std;
 
 int AmericanOption::Mtraining(int l) {
-	return 50 * pow(2, l);
+	return 15 * pow(3, l);
 }
 
 void AmericanOption::trainingpaths_regression(int l) {
