@@ -14,62 +14,23 @@ double dnd(double x) {
 	return 1. / sqrt(2. * 3.14159265) * exp(-x * x / 2.);
 }
 
-double min(double x, double y) {
-	return x < y ? x : y;
-}
-
-double maxi(double x, double y) {
-	return x < y ? y : x;
-}
-
-double EuroBewerter::call_diff(double t, double T, double X0, double Strike,
-		double r, double delta, double sigma) {
-	double f = call(t, T, X0, Strike, r, delta, sigma);
-
-	double fh = call(t, T, X0 + 0.00001, Strike, r, delta, sigma);
-	return (fh - f) / 0.00001;
-}
-
-double EuroBewerter::put_diff(double t, double T, double X0, double Strike,
-		double r, double delta, double sigma) {
-	double rStrich = r - delta;
-	double TStrich = T - t;
-	double d1 = (log(X0 / Strike) + (rStrich + sigma * sigma / 2) * TStrich)
-			/ (sigma * sqrt(TStrich));
-	return exp(-r * t - delta * TStrich) * (cnd(d1) - 1.);
-}
-
-double EuroBewerter::put_diff2(double t, double T, double X0, double Strike,
-		double r, double delta, double sigma) {
-
-	double d1 = (log(X0 / Strike) + (r - delta + sigma * sigma / 2) * (T - t))
-			/ (sigma * sqrt(T - t));
-	return exp(-(r - delta) * t) * exp(-T * delta) * (-cnd(-d1));
-}
-
 double EuroBewerter::call(double t, double T, double X0, double Strike,
 		double r, double delta, double sigma) {
 	double rStrich = r - delta;
 	double TStrich = T - t;
-	double d1 = (log(X0 / Strike) + (rStrich + sigma * sigma / 2.) * TStrich)
-			/ (sigma * sqrt(TStrich));
+	double d1 = (log(X0 / Strike) + (rStrich + sigma * sigma / 2.) * TStrich) / (sigma * sqrt(TStrich));
 	double d2 = d1 - sigma * sqrt(TStrich);
 	double wert = (X0 * cnd(d1) - Strike * exp(-rStrich * TStrich) * cnd(d2));
-	wert *= exp(-(delta) * T);
-	return wert * exp(-t * (r - delta));
+	return wert *exp(-(delta) * T)* exp(-t * (r - delta));
 }
 
 double EuroBewerter::put(double t, double T, double X0, double Strike, double r,
 		double delta, double sigma) {
 	double rStrich = r - delta;
 	double TStrich = T - t;
-	double d1 = (log(X0 / Strike) + (rStrich + sigma * sigma / 2) * TStrich)
-			/ (sigma * sqrt(TStrich));
+	double d1 = (log(X0 / Strike) + (rStrich + sigma * sigma / 2) * TStrich)/ (sigma * sqrt(TStrich));
 	double d2 = d1 - sigma * sqrt(TStrich);
-	return exp(-r * t)
-			* (exp(-delta * TStrich)
-					* (Strike * exp(-rStrich * TStrich) * cnd(-d2)
-							- X0 * cnd(-d1)));
+	return exp(-r * t)	* (exp(-delta * TStrich)* (Strike * exp(-rStrich * TStrich) * cnd(-d2)	- X0 * cnd(-d1)));
 }
 
 //Margrabes Formel
@@ -88,27 +49,12 @@ double EuroBewerter::exchange_option(double x, double y, double t, double T,
 	return erg * exp(-r * t);
 }
 
-double EuroBewerter::exchange_option_diff(double x, double y, double t,
-		double T, double r, double delta, double sigma, int re) {
-
-	double TStrich = T - t;
-	double Wurzel = sqrt(2.) * sigma * sqrt(TStrich);
-
-	double d1 = (log(x / y) + (sigma * sigma) * TStrich) / Wurzel;
-	double d2 = (log(x / y) - (sigma * sigma) * TStrich) / Wurzel;
-
-	if (re == 0)
-		return exp(-r * t - delta * (T - t))
-				* (cnd(d1) + (dnd(d1) - y / x * dnd(d2)) / Wurzel);
-	else
-		return exp(-r * t - delta * (T - t))
-				* (-cnd(d2) + (dnd(d2) - x / y * dnd(d1)) / Wurzel);
-}
-
 double EuroBewerter::european_MaxCall_ND(double* x, int D, double t, double T,
 		double Strike, double r, double delta, double sigma, double dt) {
+	
 	if(D==1)
 		return call(t,T,x[0],Strike,r,delta,sigma);
+	
 	if(dt==0)
 		return 0;
 		

@@ -57,7 +57,6 @@ void AmericanOption::ErgebnisseAusgeben(int l) {
 	ofstream File4(buffer, ios::out | ios::app);
 	if (File4.is_open())
 		File4 << varianz(LevelergsFiner[l]) << endl;
-
 }
 
 void AmericanOption::printInfo() {
@@ -86,6 +85,7 @@ void AmericanOption::addLevelPath(int l) {
 	for (int d = 0; d < D; ++d)
 		for (int n = 0; n < N; ++n)
 			wdiff[n][d] = generator.nextGaussian() * sqrt(dt);
+
 	Pfadgenerieren(XX, wdiff, 0, X0);
 	double e1 = Pfad(XX, l);
 
@@ -98,11 +98,13 @@ void AmericanOption::addLevelPath(int l) {
 double AmericanOption::Pfad(double ** XX, int l) {
 	double erg = 0;
 
+	double v=EB.european_MaxCall_ND(X0, D, 0, T, Strike, r, delta, sigma[0], 0.001);
+				
 	for (int n = 0; n < N; ++n) {
 		if (payoff(XX[n], n) > 0 || n == N - 1)
 			if (payoff(XX[n], n) >= C_estimate_Mesh(XX[n], n, l)) {
 				erg += payoff(XX[n], n);
-					erg -=1.2* (EB.european_MaxCall_ND(XX[n], D, (double) (n) * dt, T, Strike, r, delta, sigma[0], 0.1/(double)Mtraining(l)) - 6.65509);
+				erg -=1.2* (EB.european_MaxCall_ND(XX[n], D, (double) (n) * dt, T, Strike, r, delta, sigma[0], 0.001) - v);
 				break;
 			}
 	}
@@ -114,8 +116,7 @@ double AmericanOption::Pfad(double ** XX, int l) {
 			if (payoff(XX[n], n) > 0 || n == N - 1)
 				if (payoff(XX[n], n) >= C_estimate_Mesh(XX[n], n, l - 1)) {
 					erg -= payoff(XX[n], n);
-					erg += 1.2* (EB.european_MaxCall_ND(XX[n], D, (double) (n) * dt, T, Strike, r, delta, sigma[0], 0.1/(double)Mtraining(l)) - 6.65509);
-
+					erg += 1.2* (EB.european_MaxCall_ND(XX[n], D, (double) (n) * dt, T, Strike, r, delta, sigma[0], 0.001) - v);
 					break;
 				}
 		}
@@ -247,7 +248,7 @@ void AmericanOption::simplified() {
 void AmericanOption::run() {
 	Daten();
 
-	L = 3;
+	L = 4;
 	dt = T / (double) (N - 1);
 	X = DoubleFeld(L, Mtraining(L - 1), N, D);
 	V = DoubleFeld(L, Mtraining(L - 1), N);
@@ -265,8 +266,8 @@ void AmericanOption::run() {
 		trainingpaths_regression(l);
 	}
 
-	for (int kk = 0; kk < 10; ++kk) {		
-		for (int i = 0; i < 100; ++i)
+	for (int kk = 0; kk < 1000; ++kk) {		
+		for (int i = 0; i < 1000; ++i)
 			for (int l = 0; l < L; ++l)
 				addLevelPath(l);
 		printInfo();

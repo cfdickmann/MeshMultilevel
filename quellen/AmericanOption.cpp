@@ -11,15 +11,15 @@ AmericanOption::AmericanOption() {
 }
 
 AmericanOption::~AmericanOption() {
-	delete[] X0; // Spot
-	delete[] sigma; //Volatility
+	delete[] X0; 
+	delete[] sigma; 
 }
 
 double AmericanOption::payoff(double* x, int time) {
 	return std::max(Max(x, D) - Strike, 0.) * exp(-r * dt * (double) (time)); 
 }
 
-void AmericanOption::Pfadgenerieren(double** X, int start, double* S,		RNG* generator) {
+void AmericanOption::Pfadgenerieren(double** X, int start, double* S, RNG* generator) {
 	double** wdiff = DoubleFeld(N, D);
 	for (int n = 0; n < N; ++n)
 		for (int d = 0; d < D; ++d)
@@ -29,7 +29,7 @@ void AmericanOption::Pfadgenerieren(double** X, int start, double* S,		RNG* gene
 	deleteDoubleFeld(wdiff, N, D);
 }
 
-void AmericanOption::Pfadgenerieren(double** X, double** wdiff, int start,	double * S) {
+void AmericanOption::Pfadgenerieren(double** X, double** wdiff, int start,double* S) {
 	for (int d = 0; d < D; ++d)
 		X[start][d] = S[d];
 	for (int d = 0; d < D; ++d) {
