@@ -124,6 +124,60 @@ double AmericanOption::Pfad(double ** XX, int l) {
 	return erg;
 }
 
+/*
+
+double AmericanOption::Pfad(double ** XX, int l) {
+	double erg = 0;
+
+	double v=EB.european_MaxCall_ND(X0, D, 0, T, Strike, r, delta, sigma[0], 0.001);
+				
+    //Plus
+    if(l>0)
+    {
+        for (int n = 0; n < N; ++n) 
+        {
+            if (payoff(XX[n], n) > 0 || n == N - 1)
+                if (payoff(XX[n], n) >= C_estimate_Mesh(XX[n], n, l)) 
+                {
+                    erg += payoff(XX[n], n);
+                    erg -=1.2* (EB.european_MaxCall_ND(XX[n], D, (double) (n) * dt, T, Strike, r, delta, sigma[0], 0.001) - v);
+                    break;
+                }
+        }	
+    }
+    else 
+    {
+        erg += 1.2*EB.european_MaxCall_ND(X0, D, 0, T, Strike, r, delta, sigma[0], 0.001);
+        
+    }    
+    
+	LevelergsFiner[l].push_back(erg);    
+    
+    
+    //Minus
+	if (l > 1)
+		for (int n = 0; n < N; ++n) {
+			if (payoff(XX[n], n) > 0 || n == N - 1)
+				if (payoff(XX[n], n) >= C_estimate_Mesh(XX[n], n, l - 1)) {
+					erg -= payoff(XX[n], n);
+					erg += 1.2* (EB.european_MaxCall_ND(XX[n], D, (double) (n) * dt, T, Strike, r, delta, sigma[0], 0.001) - v);
+					break;
+				}
+		}
+    else
+    {
+        if(l==1)
+        {
+            erg -= 1.2*payoff(XX[N-1], N-1);
+            erg += 1.2* (EB.european_MaxCall_ND(XX[N-1], D, T, T, Strike, r, delta, sigma[0], 0.001) - v);
+        }
+            
+    }
+
+	return erg;
+}
+*/
+
 void AmericanOption::simplified() {
 	printf("simplified multilevel\n");
 

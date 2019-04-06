@@ -1,6 +1,9 @@
 #ifndef EUROBEWERTER_H_
 #define EUROBEWERTER_H_
 
+
+#include <functional>
+
 namespace std {
 
 class EuroBewerter {
